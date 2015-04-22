@@ -79,6 +79,6 @@ def send_rows_periodic(u, rank, px, row, tagsU, tagsD, rankU, rankD):
 
 def send_periodic(u, rank, px, col, row, tagsL, tagsR, tagsU, tagsD,
                      rankL, rankR, rankU, rankD):
-    u = send_columns_periodic(u, rank, px, col, tagsL, tagsR, rankL, rankR)
+    u = send_cols_periodic(u, rank, px, col, tagsL, tagsR, rankL, rankR)
     u = send_rows_periodic(u, rank, px, row, tagsU, tagsD, rankU, rankD)
     return u
