@@ -9,8 +9,8 @@ config = {
     'url': 'https://github.com/Poulin-Research-Group',
     'download_url': 'https://github.com/Poulin-Research-Group/helpers',
     'author_email': 'd.h.stlaurent@gmail.com',
-    'version': '0.1.2',
-    'install_requires': ['mpi4py'],
+    'version': '0.1.4',
+    'install_requires': ['mpi4py', 'matplotlib', 'numpy'],
     'packages': ['fjp_helpers'],
     'name': 'fjp_helpers'
 }
