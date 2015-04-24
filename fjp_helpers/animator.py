@@ -1,47 +1,39 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from misc import reshape_soln_x, reshape_soln_y, reshape_soln_xy
 
 
-def get_ims_x(U, xg, yg, Nt):
-    ims = []
-    for j in xrange(Nt):
-        ims.append((plt.pcolormesh(xg[1:-1], yg[1:-1], U[:, :, j], norm=plt.Normalize(0, 1)), ))
-    return ims
+def mesh_animator(U, xg, yg, nx, ny, Nt, p, px, py, direc, filename):
 
-
-def get_ims_y(U, xg, yg, Nt, p):
-    ims = []
-    for j in xrange(Nt):
-        U_j = np.vstack([arr.transpose() for arr in np.array_split(U[:, :, j].transpose(), p)])
-        ims.append((plt.pcolormesh(xg[1:-1], yg[1:-1], U_j, norm=plt.Normalize(0, 1)), ))
-    return ims
-
-
-def get_ims_xy(U, xg, yg, nx, ny, Nt, p, px, py):
-    ims = []
-    for j in xrange(Nt):
-        U_j = U[:, :, j].reshape(ny, p*nx)
-        temp = [None for i in xrange(py)]
-        for i in xrange(py):
-            temp[i] = U_j[:, i*px*nx : (i+1)*px*nx]
-
-        U_j = np.vstack(temp)
-        ims.append((plt.pcolormesh(xg[1:-1], yg[1:-1], U_j, norm=plt.Normalize(0, 1)), ))
-    return ims
-
-
-def mesh_animator(U, xg, yg, nx, ny, Nt, method, p, px, py):
     fig = plt.figure()
     print 'creating meshes...'
-    if px == 1:
-        ims = get_ims_y(U, xg, yg, Nt, p)
+
+    if px == 1 and py == 1:
+        reshaper = reshape_soln_x
+    elif px == 1:
+        reshaper = reshape_soln_y
     elif py == 1:
-        ims = get_ims_x(U, xg, yg, Nt)
+        reshaper = reshape_soln_x
     else:
-        ims = get_ims_xy(U, xg, yg, nx, ny, Nt, p, px, py)
+        reshaper = reshape_soln_xy
+
+    ims = []
+    for j in xrange(Nt):
+        ug = U[:, j]
+        ims.append((plt.pcolormesh(xg[1:-1], yg[1:-1], reshaper(ug, nx, ny, p, px, py),
+                    norm=plt.Normalize(0, 1)), ))
+
     print 'done creating meshes, attempting to put them together...'
     print 'saving...'
     im_ani = animation.ArtistAnimation(fig, ims, interval=50, repeat_delay=3000, blit=False)
-    im_ani.save('./anims/MPI_SUPER_%s_%dpx_%dpy.mp4' % (method, px, py))
+
+    # check to see if directory exists; if it doesn't, create it.
+    if not os.path.isdir(direc):
+        os.makedirs(direc)
+
+    filename = os.path.join(direc, filename)
+
+    im_ani.save(filename)
     print 'saved.'

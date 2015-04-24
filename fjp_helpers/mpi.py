@@ -5,6 +5,31 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
 
+def create_ranks(rank, p, px, py):
+    indices = [(i, j) for i in xrange(py) for j in xrange(px)]
+    procs = np.arange(p).reshape(py, px)
+    locs  = dict(zip(procs.flatten(), indices))   # map rank to location
+    loc   = locs[rank]
+
+    left  = np.roll(procs,  1, 1)
+    right = np.roll(procs, -1, 1)
+    up    = np.roll(procs,  1, 0)
+    down  = np.roll(procs, -1, 0)
+    rankL = left[loc]
+    rankR = right[loc]
+    rankU = up[loc]
+    rankD = down[loc]
+    return rank, rankL, rankR, rankU, rankD
+
+
+def create_tags(p):
+    tagsL = dict([(j, j+1) for j in xrange(p)])
+    tagsR = dict([(j,   p + (j+1)) for j in xrange(p)])
+    tagsU = dict([(j, 2*p + (j+1)) for j in xrange(p)])
+    tagsD = dict([(j, 3*p + (j+1)) for j in xrange(p)])
+    return tagsL, tagsR, tagsU, tagsD
+
+
 def create_x(px, rank, x0, xf, dx, nx, Nx):
     col = rank % px
     xg = np.linspace(x0 - dx/2, xf + dx/2, Nx+2)
